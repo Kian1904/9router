@@ -8,7 +8,7 @@ import { handleSttCore } from "open-sse/handlers/sttCore.js";
 import { errorResponse, unavailableResponse } from "open-sse/utils/error.js";
 import { HTTP_STATUS } from "open-sse/config/runtimeConfig.js";
 import { AI_PROVIDERS } from "@/shared/constants/providers";
-import * as log from "../utils/logger.js";
+import * as log from "../utils/logger.mjs";
 
 // Providers requiring credentials for STT
 const CREDENTIALED_PROVIDERS = new Set(

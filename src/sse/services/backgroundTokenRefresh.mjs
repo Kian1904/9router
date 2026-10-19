@@ -1,7 +1,7 @@
 // Background proactive OAuth token refresh — independent of inbound requests.
 // Fail-open everywhere: tick errors and per-connection failures never kill the interval.
 
-import * as log from "../utils/logger.js";
+import * as log from "../utils/logger.mjs";
 import { getRefreshLeadMs } from "open-sse/services/tokenRefresh.js";
 import { getCredentialExpiryMs } from "open-sse/services/oauthCredentialManager.js";
 
