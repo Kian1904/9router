@@ -77,7 +77,7 @@ http.createServer = (...args) => {
     startBackgroundTokenRefreshFromCustomServer();
     // M17-Render: KV sync - pull state from Cloudflare KV on boot, push periodically
     if (process.env.CF_KV_URL && process.env.CF_KV_TOKEN) {
-      import(pathToFileURL(path.join(__dirname, "src", "lib", "db", "kv-sync.js")).href)
+      import(pathToFileURL(path.join(__dirname, "src", "lib", "db", "kv-sync.mjs")).href)
         .then((kvSync) => {
           kvSync.pullFromKV().then(() => kvSync.startPeriodicSync()).catch((e) => {
             console.error("[KV-Sync] boot failed:", e.message);
