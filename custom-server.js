@@ -75,6 +75,21 @@ http.createServer = (...args) => {
   const server = origCreate(...rest, wrapped);
   server.once("listening", () => {
     startBackgroundTokenRefreshFromCustomServer();
+    // M17-Render: KV sync - pull state from Cloudflare KV on boot, push periodically
+    if (process.env.CF_KV_URL && process.env.CF_KV_TOKEN) {
+      import(pathToFileURL(path.join(__dirname, "src", "lib", "db", "kv-sync.js")).href)
+        .then((kvSync) => {
+          kvSync.pullFromKV().then(() => kvSync.startPeriodicSync()).catch((e) => {
+            console.error("[KV-Sync] boot failed:", e.message);
+          });
+          const stopSync = () => { try { kvSync.pushToKV(); kvSync.stopPeriodicSync(); } catch {} };
+          process.once("SIGINT", stopSync);
+          process.once("SIGTERM", stopSync);
+        })
+        .catch((e) => {
+          console.error("[KV-Sync] module load failed:", e.message);
+        });
+    }
   });
   const origEmit = server.emit;
   // JBR 25 sends h2c upgrades that the HTTP/1.1 server would otherwise close.

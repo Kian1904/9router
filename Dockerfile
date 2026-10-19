@@ -55,6 +55,8 @@ ENV PORT=${PORT:-10000}
 ENV HOSTNAME=0.0.0.0
 ENV NEXT_TELEMETRY_DISABLED=1
 ENV DATA_DIR=/app/data
+# Optional persistent state sync; values are injected as Render secrets.
+# CF_KV_URL, CF_KV_TOKEN, CF_KV_ENCRYPTION_KEY
 # RENDER FREE TIER FIX: paksa V8 GC agresif sebelum mentok 512MB
 ENV NODE_OPTIONS="--max-old-space-size=384"
 
