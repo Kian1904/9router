@@ -58,7 +58,7 @@ ENV DATA_DIR=/app/data
 # Optional persistent state sync; values are injected as Render secrets.
 # CF_KV_URL, CF_KV_TOKEN, CF_KV_ENCRYPTION_KEY
 # RENDER FREE TIER FIX: paksa V8 GC agresif sebelum mentok 512MB
-ENV NODE_OPTIONS="--max-old-space-size=384"
+ENV NODE_OPTIONS="--max-old-space-size=384 --disable-warning=MODULE_TYPELESS_PACKAGE_JSON"
 
 COPY --from=builder /app/public ./public
 COPY --from=builder /app/.next/static ./.next/static

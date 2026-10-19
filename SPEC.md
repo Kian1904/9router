@@ -3,7 +3,7 @@
 ## Cloudflare KV state sync
 
 - `cf-kv-worker/worker.js` exposes authenticated `GET /state` and `PUT /state` endpoints backed by a Cloudflare KV namespace binding named `NINEROUTER`.
-- `src/lib/db/kv-sync.mjs` is **self-contained** (uses `node:sqlite` directly, no `@/` alias / no raw import of `index.js`) — this fixed a runtime `Cannot find package '@/lib'` failure and removed the `MODULE_TYPELESS` reparse warning. It pulls the exported 9router database on boot and pushes changes periodically.
+- `src/lib/db/kv-sync.mjs` uses the app's DB adapter (`getAdapter` from `driver.js`) so folders, schema migrations, and the shared SQLite connection are handled correctly. This fixed a runtime `Cannot find package '@/lib'` failure (the `@/` alias in `paths.js` is now a relative import) and the earlier `unable to open database file` (raw node:sqlite before the app created the DB). It pulls the exported 9router database on boot and pushes changes periodically.
 - kv-sync safety guards: (a) never push an **empty** local DB over a remote that already has state (prevents a fresh instance clobbering a migration); (b) when the local DB is empty, the periodic tick **re-pulls** from KV to self-seed without a redeploy.
 - Round-trip verified: `exportDb` → `importDb` → `exportDb` is byte-identical (78 conn / 1 apiKey / 4 combos).
 - `src/lib/network/initOutboundProxy.js` skips SQLite-backed settings initialization during Next build phases, preventing build-time database-lock races.
