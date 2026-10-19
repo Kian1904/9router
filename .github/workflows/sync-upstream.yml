@@ -1,0 +1,47 @@
+name: Sync upstream 9router
+
+on:
+  schedule:
+    - cron: "17 */6 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: sync-upstream-master
+  cancel-in-progress: true
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout fork
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: master
+
+      - name: Merge decolua/master when it advances
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git remote add upstream https://github.com/decolua/9router.git
+          git fetch --prune upstream master
+
+          if git merge-base --is-ancestor upstream/master HEAD; then
+            echo "Upstream is already included; nothing to do."
+            exit 0
+          fi
+
+          echo "Upstream advanced. Merging into fork master..."
+          if ! git merge --no-edit upstream/master; then
+            git merge --abort || true
+            echo "::error::Upstream sync has conflicts. No deployment was triggered. Resolve manually."
+            exit 1
+          fi
+
+          git push origin HEAD:master
+          echo "Merged upstream and pushed; Render should deploy the new master commit."
