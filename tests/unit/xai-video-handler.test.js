@@ -34,7 +34,7 @@ vi.mock("@/lib/localDb", () => ({
   getModelAliases: vi.fn(async () => ({})),
   getProviderNodes: vi.fn(async () => []),
 }));
-vi.mock("@/sse/utils/logger.js", () => ({ info: vi.fn(), warn: vi.fn(), error: vi.fn(), debug: vi.fn() }));
+vi.mock("@/sse/utils/logger.mjs", () => ({ info: vi.fn(), warn: vi.fn(), error: vi.fn(), debug: vi.fn() }));
 
 import { handleVideoCreate, handleVideoGet } from "@/sse/handlers/videoGeneration.js";
 
