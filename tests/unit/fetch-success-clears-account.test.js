@@ -34,7 +34,7 @@ vi.mock("@/sse/services/tokenRefresh.js", () => ({
   updateProviderCredentials: vi.fn(),
 }));
 
-vi.mock("@/sse/utils/logger.js", () => ({
+vi.mock("@/sse/utils/logger.mjs", () => ({
   request: vi.fn(),
   info: vi.fn(),
   debug: vi.fn(),

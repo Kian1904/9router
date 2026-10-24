@@ -27,7 +27,7 @@ vi.mock("../../open-sse/utils/error.js", () => ({
   errorResponse: (status, message) => Response.json({ error: message }, { status }),
   unavailableResponse: (status, message) => Response.json({ error: message }, { status }),
 }));
-vi.mock("../../src/sse/utils/logger.js", () => ({
+vi.mock("../../src/sse/utils/logger.mjs", () => ({
   request: vi.fn(), debug: vi.fn(), warn: vi.fn(), error: vi.fn(), info: vi.fn(), maskKey: vi.fn(),
 }));
 vi.mock("../../src/sse/services/tokenRefresh.js", () => ({
