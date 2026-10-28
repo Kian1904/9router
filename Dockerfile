@@ -37,6 +37,24 @@ RUN APP_REVISION="${APP_REVISION:-$RAILWAY_GIT_COMMIT_SHA}" npm run build
 # Postbuild: copy standalone assets (wajib per catatan build 9router)
 RUN node scripts/copy-standalone-assets.mjs 2>/dev/null || true
 
+# https://github.com/decolua/9router/issues/5245
+# wreq-js and playwright-core are lazy runtime dependencies (loaded by
+# lazyRuntime.js via createRequire). Next standalone tracing does not include
+# them, so OpenCode Free fails with HTTP 502 ("resolve is undefined").
+# Install them (with their native bindings/transitive deps) in an isolated dir
+# so the runner stage can copy them into /app/node_modules.
+RUN --mount=type=cache,target=/root/.npm \
+    mkdir -p /opt/lazy-runtime && cd /opt/lazy-runtime && \
+    npm init -y >/dev/null && \
+    npm install --no-save \
+      --registry="${NPM_REGISTRY}" \
+      --fetch-retries=5 \
+      --fetch-retry-factor=2 \
+      --fetch-retry-mintimeout=10000 \
+      --fetch-retry-maxtimeout=120000 \
+      --fetch-timeout=300000 \
+      wreq-js playwright-core
+
 FROM ${NODE_IMAGE} AS runner
 ARG ALPINE_MIRROR
 ARG APP_VERSION
@@ -77,6 +95,9 @@ COPY --from=builder /app/node_modules/node-forge ./node_modules/node-forge
 COPY --from=builder /app/node_modules/next ./node_modules/next
 COPY --from=builder /app/node_modules/sql.js ./node_modules/sql.js
 COPY --from=builder /app/node_modules/node-machine-id ./node_modules/node-machine-id
+# wreq-js + playwright-core (and deps) are lazy-loaded at runtime and omitted by
+# tracing. See https://github.com/decolua/9router/issues/5245
+COPY --from=builder /opt/lazy-runtime/node_modules/. ./node_modules/
 
 RUN mkdir -p /app/data && chown -R node:node /app && \
   mkdir -p /app/data-home && chown node:node /app/data-home && \
